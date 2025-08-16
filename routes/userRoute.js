@@ -1,13 +1,15 @@
-const express = require('express')
+import express from "express";
+import {
+ 
+  getUserData
+  
+} from "../controllers/userController.js";
+import userAuth from "../middleware/userAuth.js";
 
-const router=express.Router();
+const userRouter = express.Router();
 
-const {createUser, getUsers, getSingleUser, updateUser, deleteUser}=require("../controllers/userController");
 
-router.post("/createUser",createUser);
-router.get("/",getUsers);
-router.get("/:id",getSingleUser);
-router.patch("/:id",updateUser); 
-router.delete("/:id",deleteUser);
+userRouter.get("/data",userAuth, getUserData);
 
-module.exports=router;
+
+export default userRouter;
