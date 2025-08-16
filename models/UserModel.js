@@ -1,4 +1,4 @@
-const mongoose=require('mongoose');
+import mongoose from "mongoose";
 
 const Schema=mongoose.Schema;
 
@@ -11,20 +11,47 @@ const UserSchema=new Schema(
         email:{
             type:String,
             require:true,
+            unique:true,//cant have same email
         },
-        userName:{
-            type:String,
-            require:true,
-        },
+        // userName:{
+        //     type:String,
+        //     require:true,
+        // },
         password:{
             type:String,
             require:true,
         },
-        role:{
+         // role:{
+        //     type:String,
+        //     require:true,
+        // }
+        verifyOtp:{
             type:String,
-            require:true,
-        }
+            default:'',
+        },
+        verifyOtpExpireAt:{
+            type:Number,
+            default:0
+        },
+        isAccountVerified:{
+            type:Boolean,
+            default:false
+        },
+        resetOtp:{
+            type:String,
+            default:'',
+        },
+        resetOtpExpireAt:{
+            type:Number,
+            default:0,
+        },
+
     },    
 );
 
-module.exports=mongoose.model("User",UserSchema);
+// // module.exports=mongoose.model("User",UserSchema);
+// export default mongoose.model("User", UserSchema);
+
+const userModel=mongoose.models.user || mongoose.model('user',UserSchema);
+
+export default userModel;
