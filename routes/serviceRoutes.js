@@ -1,13 +1,8 @@
-import express from 'express';
+import express from 'express'
+import { serviceList } from '../controllers/serviceController.js'
 
-const router=express.Router();
+const serviceRouter = express.Router()
 
-import { addService, getServices, getSingleService ,updateService ,deleteService} from "../controllers/serviceController.js";
+serviceRouter.get('/list',serviceList)
 
-router.post("/addService",addService);
-router.get("/",getServices);
-router.get("/:id",getSingleService);
-router.patch("/:id",updateService); 
-router.delete("/:id",deleteService);
-
-export default router;
+export default serviceRouter;
