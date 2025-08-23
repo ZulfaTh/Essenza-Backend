@@ -1,0 +1,21 @@
+import mongoose, { isObjectIdOrHexString } from "mongoose";
+
+const appointmentSchema = new mongoose.Schema({
+  userId: { type: String, required: true },
+  staffId: { type: String, required: true },
+  services: [ {type: String, required: true} ],
+  slotDate: { type: String, required: true },
+  slotTime: { type: String, required: true },
+  serviceData: { type: Object, required: true },
+  userData: { type: Object, required: true },
+  staffData: { type: Object, required: true },
+  amount: { type: Number, required: true },
+  date: { type: Number, required: true },
+  phone: { type: Number, required: true },
+  cancelled: { type: Boolean, default:false},
+  payment:{type:Boolean,default:false},
+  isCompleted:{type:Boolean,default:false},
+});
+
+const appointmentModel = mongoose.models.appointment || mongoose.model('appointment',appointmentSchema)
+export default appointmentModel;

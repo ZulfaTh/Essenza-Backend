@@ -1,5 +1,6 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import validator from "validator";
 import userModel from "../models/UserModel.js";
 import transporter from "../config/nodemailer.js";
 
@@ -26,8 +27,26 @@ export const register = async (req, res) => {
       return res.json({ success: false, message: "User already exists" });
     }
 
+    //validating email format
+    if (!validator.isEmail(email)) {
+      return res.json({
+        success: false,
+        message: "Please enter a valid email",
+      });
+    }
+
+    //validating strong passowrd
+    if (password.length < 8) {
+      return res.json({
+        success: false,
+        message: "Please enter a strong password",
+      });
+    }
+
     //encrpyt the  passwprd using bcrypt
-    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
 
     //create new user and save to db
     const user = new userModel({ name, email, password: hashedPassword });
@@ -276,7 +295,17 @@ export const resetPassword = async (req, res) => {
       return res.json({ success: false, message: "OTP expired" });
     }
 
+    
+
     const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+//validating strong passowrd
+    if (newPassword.length < 8) {
+      return res.json({
+        success: false,
+        message: "Please enter a strong password",
+      });
+    }
 
     user.password = hashedPassword;
     user.resetOtp = "";

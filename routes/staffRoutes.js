@@ -1,18 +1,8 @@
-import express from "express";
-import {
-  addStaff,
-  getStaffs,
-  getSingleStaff,
-  updateStaff,
-  deleteStaff,
-} from "../controllers/staffController.js";
+import express from 'express'
+import { staffList } from '../controllers/staffController.js'
 
-const router = express.Router();
+const staffRouter = express.Router()
 
-router.post("/addStaff", addStaff);
-router.get("/", getStaffs);
-router.get("/:id", getSingleStaff);
-router.patch("/:id", updateStaff);
-router.delete("/:id", deleteStaff);
+staffRouter.get('/list',staffList)
 
-export default router;
+export default staffRouter;

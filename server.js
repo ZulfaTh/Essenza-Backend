@@ -2,11 +2,14 @@ import express from "express";
 import "dotenv/config";
 import cors from "cors";
 import mongoose from "mongoose";
+import connectCloudinary from './config/cloudinary.js';
 import cookieParser from "cookie-parser";
 import userRoutes from "./routes/userRoute.js";
-import serviceRoutes from "./routes/serviceRoutes.js";
-import staffRoutes from "./routes/staffRoutes.js";
+
 import authRouter from "./routes/authRoutes.js";
+import adminRouter from "./routes/adminRoute.js";
+import staffRouter from "./routes/staffRoutes.js";
+import serviceRouter from "./routes/serviceRoutes.js";
 
 
 const app = express();
@@ -23,7 +26,9 @@ mongoose
   })
   .catch((error) => console.log(error));
 
-const allowedOrigins=['http://localhost:5173']
+connectCloudinary();
+
+const allowedOrigins=['http://localhost:5173','http://localhost:5174']
 
 app.use(express.json());
 app.use(cookieParser());
@@ -35,5 +40,7 @@ app.get("/", (req, res) => {
 });
 app.use("/api/auth", authRouter);
 app.use("/api/user", userRoutes);
-app.use("/api/services", serviceRoutes);
-app.use("/api/staffs", staffRoutes);
+app.use("/api/admin",adminRouter);
+app.use("/api/staff",staffRouter);
+app.use("/api/service",serviceRouter);
+
