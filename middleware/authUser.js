@@ -1,8 +1,8 @@
-//to find token from cookie and from that find userId
+//to find token from cookie and from that find staffId
 
 import jwt from "jsonwebtoken";
 
-const userAuth = async (req, res, next) => {
+const authUser = async (req, res, next) => {
   const { token } = req.cookies;
 
   if (!token) {
@@ -17,8 +17,6 @@ const userAuth = async (req, res, next) => {
         req.body = {};
       }
       req.body.userId = tokenDecode.id;
-
-      req.body.userId = tokenDecode.id;
     } else {
       return res.json({
         success: false,
@@ -31,4 +29,4 @@ const userAuth = async (req, res, next) => {
   }
 };
 
-export default userAuth;
+export default authUser;
