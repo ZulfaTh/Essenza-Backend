@@ -1,9 +1,9 @@
-import mongoose, { isObjectIdOrHexString } from "mongoose";
+import mongoose from "mongoose";
 
 const appointmentSchema = new mongoose.Schema({
   userId: { type: String, required: true },
   staffId: { type: String, required: true },
-  services: [ {type: String, required: true} ],
+  services: [{ type: String, required: true }],
   slotDate: { type: String, required: true },
   slotTime: { type: String, required: true },
   serviceData: { type: Object, required: true },
@@ -12,10 +12,17 @@ const appointmentSchema = new mongoose.Schema({
   amount: { type: Number, required: true },
   date: { type: Number, required: true },
   phone: { type: Number, required: true },
-  cancelled: { type: Boolean, default:false},
-  payment:{type:Boolean,default:false},
-  isCompleted:{type:Boolean,default:false},
+  cancelled: { type: Boolean, default: false },
+  payment: { type: Boolean, default: false },
+  isCompleted: { type: Boolean, default: false },
+  review: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "review",
+    default: null,
+  },
 });
 
-const appointmentModel = mongoose.models.appointment || mongoose.model('appointment',appointmentSchema)
+const appointmentModel =
+  mongoose.models.appointment ||
+  mongoose.model("appointment", appointmentSchema);
 export default appointmentModel;

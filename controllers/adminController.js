@@ -1,11 +1,12 @@
 import validator from "validator";
 import bcrypt from "bcryptjs";
 import { v2 as cloudinary } from "cloudinary";
-import userModel from '../models/UserModel.js'
+import userModel from "../models/UserModel.js";
 import staffModel from "../models/staffModel.js";
 import serviceModel from "../models/serviceModel.js";
 import jwt from "jsonwebtoken";
 import appointmentModel from "../models/appointmentModel.js";
+import reviewModel from "../models/reviewModel.js";
 
 //API for adding staff
 const addStaff = async (req, res) => {
@@ -111,6 +112,113 @@ const addService = async (req, res) => {
   }
 };
 
+//Edit staff
+const updateStaff = async (req, res) => {
+  try {
+    const { staffId, name, experience, speciality, about } = req.body;
+    const imageFile = req.file;
+
+    if (!name || !experience || !speciality || !about) {
+      return res.json({ success: false, message: "Data Missing" });
+    }
+
+    const updateData = { name, experience, speciality, about };
+
+    if (imageFile) {
+      // upload image to cloudinary
+      const imageUpload = await cloudinary.uploader.upload(imageFile.path, {
+        resource_type: "image",
+      });
+      updateData.image = imageUpload.secure_url;
+    }
+
+    const updatedStaff = await staffModel.findByIdAndUpdate(
+      staffId,
+      updateData,
+      { new: true }
+    );
+
+    return res.json({ success: true, message: "Profile updated", staff: updatedStaff });
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: error.message });
+  }
+};
+
+// Edit Service
+const updateService = async (req, res) => {
+  try {
+    const { serviceId, name, about, duration, price } = req.body;
+    const imageFile = req.file;
+
+    if (!name || !about || !duration || !price) {
+      return res.json({ success: false, message: "Data Missing" });
+    }
+
+    const updateData = { name, about, duration, price };
+
+    if (imageFile) {
+      // upload new image if provided
+      const imageUpload = await cloudinary.uploader.upload(imageFile.path, {
+        resource_type: "image",
+      });
+      updateData.image = imageUpload.secure_url;
+    }
+
+    const updatedService = await serviceModel.findByIdAndUpdate(
+      serviceId,
+      updateData,
+      { new: true }
+    );
+
+    return res.json({
+      success: true,
+      message: "Service updated",
+      service: updatedService,
+    });
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: error.message });
+  }
+};
+
+// Delete Staff
+const deleteStaff = async (req, res) => {
+  try {
+    const { staffId } = req.body;
+
+    if (!staffId) {
+      return res.json({ success: false, message: "Staff ID is required" });
+    }
+
+    await staffModel.findByIdAndDelete(staffId);
+
+    res.json({ success: true, message: "Staff deleted successfully" });
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: error.message });
+  }
+};
+
+// Delete Service
+const deleteService = async (req, res) => {
+  try {
+    const { serviceId } = req.body;
+
+    if (!serviceId) {
+      return res.json({ success: false, message: "Service ID is required" });
+    }
+
+    await serviceModel.findByIdAndDelete(serviceId);
+
+    res.json({ success: true, message: "Service deleted successfully" });
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: error.message });
+  }
+};
+
+
 //API for admin login
 const loginAdmin = async (req, res) => {
   try {
@@ -125,6 +233,17 @@ const loginAdmin = async (req, res) => {
     } else {
       res.json({ success: false, message: "Invalid credentials" });
     }
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: error.message });
+  }
+};
+
+//ApI to get all users for admin page
+const allUsers = async (req, res) => {
+  try {
+    const users = await userModel.find({}).select("-password"); 
+    res.json({ success: true, users });
   } catch (error) {
     console.log(error);
     res.json({ success: false, message: error.message });
@@ -153,12 +272,48 @@ const allServices = async (req, res) => {
   }
 };
 
+const allReviews = async (req, res) => {
+  try {
+    const reviews = await reviewModel
+      .find()
+      .populate("userId", "name email")
+      .populate("staffId", "name email")
+      .sort({ createdAt: -1 });
+
+    res.json({ success: true, reviews });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 //API to get all appointment list
 const appointmentsAdmin = async (req, res) => {
   try {
-    const appointments = await appointmentModel.find({});
+    const appointments = await appointmentModel
+      .find({})
+      .populate("review", "rating comment");
 
     res.json({ success: true, appointments });
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: error.message });
+  }
+};
+
+const appointmentComplete = async (req, res) => {
+  try {
+    const { staffId, appointmentId } = req.body;
+
+    const appointmentData = await appointmentModel.findById(appointmentId);
+
+    if (appointmentData && appointmentData.staffId === staffId) {
+      await appointmentModel.findByIdAndUpdate(appointmentId, {
+        isCompleted: true,
+      });
+      return res.json({ success: true, message: "Appointment Completed" });
+    } else {
+      return res.json({ success: false, message: "Mark failed" });
+    }
   } catch (error) {
     console.log(error);
     res.json({ success: false, message: error.message });
@@ -202,19 +357,20 @@ const adminDashboard = async (req, res) => {
   try {
     const staffs = await staffModel.find({});
     const users = await userModel.find({});
-    const services= await serviceModel.find({});
-    const appointments= await appointmentModel.find({});
+    const services = await serviceModel.find({});
+    const appointments = await appointmentModel
+      .find({})
+      .populate("review", "rating comment");
 
-    const dashData ={
-      staffs:staffs.length,
-      users:users.length,
-      services:services.length,
-      appointments:appointments.length,
-      latestAppointments:appointments.reverse().slice(0,5)
-    }
+    const dashData = {
+      staffs: staffs.length,
+      users: users.length,
+      services: services.length,
+      appointments: appointments.length,
+      latestAppointments: appointments.reverse().slice(0, 5),
+    };
 
-   res.json({ success: true, dashData });
-
+    res.json({ success: true, dashData });
   } catch (error) {
     console.log(error);
     res.json({ success: false, message: error.message });
@@ -223,11 +379,18 @@ const adminDashboard = async (req, res) => {
 
 export {
   addStaff,
+  updateStaff,
+  deleteStaff,
   addService,
+  updateService,
+  deleteService,
   loginAdmin,
+  allUsers,
   allStaffs,
   allServices,
+  allReviews,
   appointmentsAdmin,
+  appointmentComplete,
   appointmentCancel,
-  adminDashboard
+  adminDashboard,
 };
