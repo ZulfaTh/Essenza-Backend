@@ -10,6 +10,8 @@ import authRouter from "./routes/authRoutes.js";
 import adminRouter from "./routes/adminRoute.js";
 import staffRouter from "./routes/staffRoutes.js";
 import serviceRouter from "./routes/serviceRoutes.js";
+import paymentRouter from "./routes/paymentRoutes.js";
+import reviewRouter from "./routes/reviewRoute.js";
 
 
 const app = express();
@@ -43,4 +45,6 @@ app.use("/api/user", userRoutes);
 app.use("/api/admin",adminRouter);
 app.use("/api/staff",staffRouter);
 app.use("/api/service",serviceRouter);
+app.use("/api/payment",paymentRouter);
+app.use('/api/reviews',reviewRouter);
 

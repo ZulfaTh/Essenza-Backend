@@ -116,7 +116,8 @@ const bookAppointment = async (req, res) => {
       slotTime,
       slotDate,
       date: Date.now(),
-      cancelled: false
+      cancelled: false,
+      payment:true
     };
 
     // ✅ Save appointment
@@ -149,6 +150,7 @@ const listAppointment = async (req,res) =>{
     const {userId} = req.body;
 
     const appointments = await appointmentModel.find({userId})
+    .populate("review", "rating comment createdAt");
 
     res.json({success:true,appointments})
 
